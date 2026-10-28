@@ -300,7 +300,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ═══════════════════════════════════════════════
-  //  WORK SECTION: pill nav with sliding indicator
+  //  WORK SECTION: vertical side nav with sliding indicator
+  //  (falls back to a horizontal pill row on narrow screens)
   // ═══════════════════════════════════════════════
   const workNav = document.querySelector('.work-nav');
   if (workNav) {
@@ -312,12 +313,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return tabs.find(t => t.classList.contains('is-active')) || tabs[0];
     }
 
+    const isVertical = () => getComputedStyle(workNav).flexDirection === 'column';
+
     function moveIndicator(tab) {
       if (!indicator || !tab) return;
-      const navRect = workNav.getBoundingClientRect();
-      const rect = tab.getBoundingClientRect();
-      indicator.style.width = rect.width + 'px';
-      indicator.style.transform = `translateX(${rect.left - navRect.left + workNav.scrollLeft}px)`;
+      if (isVertical()) {
+        indicator.style.width = '';
+        indicator.style.height = tab.offsetHeight + 'px';
+        indicator.style.transform = `translateY(${tab.offsetTop}px)`;
+      } else {
+        indicator.style.height = '';
+        indicator.style.width = tab.offsetWidth + 'px';
+        indicator.style.transform = `translateX(${tab.offsetLeft}px)`;
+      }
     }
 
     function activateTab(nextTab, { focus = true } = {}) {
@@ -338,7 +346,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      nextTab.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+      if (!isVertical()) {
+        workNav.scrollTo({ left: nextTab.offsetLeft - (workNav.clientWidth - nextTab.offsetWidth) / 2, behavior: 'smooth' });
+      }
       moveIndicator(nextTab);
       if (focus) nextTab.focus({ preventScroll: true });
     }
@@ -347,9 +357,13 @@ document.addEventListener("DOMContentLoaded", () => {
       tab.addEventListener('click', () => activateTab(tab, { focus: false }));
 
       tab.addEventListener('keydown', (e) => {
+        const next = (index + 1) % tabs.length;
+        const prev = (index - 1 + tabs.length) % tabs.length;
         const keyMap = {
-          ArrowRight: (index + 1) % tabs.length,
-          ArrowLeft: (index - 1 + tabs.length) % tabs.length,
+          ArrowDown: next,
+          ArrowRight: next,
+          ArrowUp: prev,
+          ArrowLeft: prev,
           Home: 0,
           End: tabs.length - 1
         };
@@ -367,7 +381,6 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(settle);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(settle);
     window.addEventListener('resize', () => moveIndicator(currentTab()), { passive: true });
-    workNav.addEventListener('scroll', () => moveIndicator(currentTab()), { passive: true });
   }
 
   // ═══════════════════════════════════════════════
@@ -427,6 +440,211 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // ═══════════════════════════════════════════════
+  //  LIVE CODING PROFILES (LeetCode + GitHub)
+  //  HTML holds fallback values; these fetches overwrite them.
+  // ═══════════════════════════════════════════════
+  const GITHUB_USER = 'Abhinav-Krishna-P';
+  const LEETCODE_USER = 'YWcKXilXgU';
+  // Weeks that fit the graph's width; cell size and gap come from .activity-graph in styles.css
+  function graphWeeks(container) {
+    const style = getComputedStyle(container);
+    const step = (parseFloat(style.gridAutoColumns) || 11) + (parseFloat(style.columnGap) || 3);
+    return Math.min(53, Math.max(8, Math.floor((container.clientWidth + 3) / step)));
+  }
+  const CACHE_TTL = 30 * 60 * 1000;
+
+  function readCache(key) {
+    try {
+      const hit = JSON.parse(localStorage.getItem(key));
+      return hit && Date.now() - hit.at < CACHE_TTL ? hit.data : null;
+    } catch { return null; }
+  }
+
+  function writeCache(key, data) {
+    try { localStorage.setItem(key, JSON.stringify({ at: Date.now(), data })); } catch { /* storage unavailable */ }
+  }
+
+  async function fetchJSON(url, timeout = 12000) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeout);
+    try {
+      const res = await fetch(url, { signal: ctrl.signal });
+      if (!res.ok) throw new Error(`${res.status} ${url}`);
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // Try each source in order until one answers
+  async function firstOk(urls, timeout) {
+    for (const url of urls) {
+      try { return await fetchJSON(url, timeout); } catch { /* try next source */ }
+    }
+    throw new Error('All sources failed');
+  }
+
+  function setField(card, attr, key, value) {
+    card.querySelectorAll(`[data-${attr}="${key}"]`).forEach(el => { el.textContent = value; });
+  }
+
+  function setLiveState(card, state) {
+    const badge = card.querySelector('[data-live-state]');
+    if (!badge) return;
+    badge.dataset.liveState = state;
+    badge.textContent = { loading: 'Loading', live: 'Live', cached: 'Offline' }[state];
+  }
+
+  const isoDay = d => d.toISOString().slice(0, 10);
+
+  // Builds a weeks x 7 grid ending today, as many weeks as fit the card;
+  // levelFor(dateString) returns 0-4
+  function renderGraph(container, levelFor, titleFor) {
+    if (!container) return;
+    container._render = () => renderGraph(container, levelFor, titleFor);
+    const weeks = graphWeeks(container);
+    container.dataset.weeks = weeks;
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const start = new Date(today);
+    start.setUTCDate(start.getUTCDate() - start.getUTCDay() - (weeks - 1) * 7);
+    const cells = [];
+    for (const d = new Date(start); d <= today; d.setUTCDate(d.getUTCDate() + 1)) {
+      const day = isoDay(d);
+      const cell = document.createElement('i');
+      cell.dataset.level = levelFor(day);
+      cell.title = titleFor(day);
+      cells.push(cell);
+    }
+    container.replaceChildren(...cells);
+  }
+
+  function countToLevel(count, max) {
+    if (!count) return 0;
+    return Math.min(4, Math.ceil((count / Math.max(max, 1)) * 4));
+  }
+
+  function maxStreak(days) {
+    const sorted = [...days].sort();
+    let best = 0, run = 0, prev = null;
+    for (const day of sorted) {
+      run = prev && (Date.parse(day) - Date.parse(prev)) === 86400000 ? run + 1 : 1;
+      best = Math.max(best, run);
+      prev = day;
+    }
+    return best;
+  }
+
+  async function loadLeetCode() {
+    const card = document.getElementById('leetcode-card');
+    if (!card) return;
+    const cacheKey = 'live:leetcode';
+    let data = readCache(cacheKey);
+    setLiveState(card, 'loading');
+    if (!data) {
+      try {
+        data = await firstOk([
+          `https://leetcode-api-faisalshohag.vercel.app/${LEETCODE_USER}`,
+          `https://alfa-leetcode-api.onrender.com/userProfile/${LEETCODE_USER}`
+        ], 15000);
+        writeCache(cacheKey, data);
+      } catch {
+        setLiveState(card, 'cached');
+        return;
+      }
+    }
+
+    const solved = data.totalSolved || 0;
+    setField(card, 'lc', 'solved', solved.toLocaleString());
+    setField(card, 'lc', 'easy', data.easySolved);
+    setField(card, 'lc', 'medium', data.mediumSolved);
+    setField(card, 'lc', 'hard', data.hardSolved);
+    if (data.ranking) setField(card, 'lc', 'ranking', Number(data.ranking).toLocaleString());
+
+    const ring = card.querySelector('.solve-ring');
+    if (ring && solved) {
+      ring.style.setProperty('--easy', (data.easySolved / solved) * 100);
+      ring.style.setProperty('--medium', (data.mediumSolved / solved) * 100);
+    }
+
+    // submissionCalendar maps unix seconds (UTC midnight) to submission counts
+    const calendar = typeof data.submissionCalendar === 'string'
+      ? JSON.parse(data.submissionCalendar)
+      : data.submissionCalendar || {};
+    const byDay = {};
+    Object.entries(calendar).forEach(([ts, count]) => {
+      byDay[isoDay(new Date(Number(ts) * 1000))] = count;
+    });
+    const total = Object.values(byDay).reduce((sum, n) => sum + n, 0);
+    const peak = Math.max(0, ...Object.values(byDay));
+    setField(card, 'lc', 'submissions', total.toLocaleString());
+    setField(card, 'lc', 'streak', maxStreak(Object.keys(byDay)));
+    renderGraph(
+      card.querySelector('[data-graph="leetcode"]'),
+      day => countToLevel(byDay[day], peak),
+      day => `${byDay[day] || 0} submissions on ${day}`
+    );
+    setLiveState(card, 'live');
+  }
+
+  async function loadGitHub() {
+    const card = document.getElementById('github-card');
+    if (!card) return;
+    const cacheKey = 'live:github';
+    let data = readCache(cacheKey);
+    setLiveState(card, 'loading');
+    if (!data) {
+      const [user, repos, contributions] = await Promise.allSettled([
+        fetchJSON(`https://api.github.com/users/${GITHUB_USER}`),
+        fetchJSON(`https://api.github.com/users/${GITHUB_USER}/repos?per_page=100&sort=pushed`),
+        fetchJSON(`https://github-contributions-api.jogruber.de/v4/${GITHUB_USER}?y=last`)
+      ]);
+      if (user.status === 'rejected' && contributions.status === 'rejected') {
+        setLiveState(card, 'cached');
+        return;
+      }
+      data = {
+        user: user.value || null,
+        repos: (repos.value || []).map(r => ({ name: r.name, stars: r.stargazers_count, fork: r.fork })),
+        contributions: contributions.value || null
+      };
+      writeCache(cacheKey, data);
+    }
+
+    if (data.user) {
+      setField(card, 'gh', 'repos', data.user.public_repos);
+      setField(card, 'gh', 'followers', data.user.followers);
+    }
+    if (data.repos.length) {
+      setField(card, 'gh', 'stars', data.repos.reduce((sum, r) => sum + r.stars, 0));
+      const latest = data.repos.find(r => !r.fork && r.name !== GITHUB_USER);
+      if (latest) setField(card, 'gh', 'latest', latest.name);
+    }
+    if (data.contributions) {
+      setField(card, 'gh', 'contributions', data.contributions.total.lastYear.toLocaleString());
+      const byDay = {};
+      data.contributions.contributions.forEach(c => { byDay[c.date] = c; });
+      renderGraph(
+        card.querySelector('[data-graph="github"]'),
+        day => (byDay[day] ? byDay[day].level : 0),
+        day => `${byDay[day] ? byDay[day].count : 0} contributions on ${day}`
+      );
+    }
+    setLiveState(card, 'live');
+  }
+
+  // Empty grids first so the cards keep their size while data loads
+  document.querySelectorAll('.activity-graph').forEach(graph => renderGraph(graph, () => 0, day => day));
+  loadLeetCode();
+  loadGitHub();
+
+  window.addEventListener('resize', () => {
+    document.querySelectorAll('.activity-graph').forEach(graph => {
+      if (graph._render && String(graphWeeks(graph)) !== graph.dataset.weeks) graph._render();
+    });
+  }, { passive: true });
 
   // ═══════════════════════════════════════════════
   //  SMOOTH SCROLL for nav anchors
