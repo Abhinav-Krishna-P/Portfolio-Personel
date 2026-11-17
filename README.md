@@ -21,4 +21,4 @@ No build step or external hosting is required.
 - Small interaction helpers: `script.js`
 - Projects: each card in `#work` is a `.project-item`; its `<template>` holds the modal content. Categories are the `.work-nav` tabs (vertical on desktop, a scrollable row on mobile) — update the count in each tab's `<em>` when adding a project
 - LeetCode / GitHub cards load live data in `script.js` (GitHub REST API, github-contributions-api.jogruber.de, a public LeetCode stats proxy). Numbers in `index.html` are fallbacks shown if those requests fail; responses are cached in localStorage for 30 minutes
-- Resume and project images: `assets/` (resume links point at `assets/Abhinav_Krishna_P_26_10_2026.pdf`; update both links in `index.html` when replacing it)
+- Resume and project images: `assets/` (resume links point at `assets/Abhinav_Krishna_P_28_10_2026.pdf`; update both links in `index.html` when replacing it)

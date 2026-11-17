@@ -27,7 +27,7 @@
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
     </nav>
-    <a class="header-cta" href="assets/Abhinav_Krishna_P_26_10_2026.pdf" download>Resume <span class="icon-arrow icon-arrow-down" aria-hidden="true"></span></a>
+    <a class="header-cta" href="assets/Abhinav_Krishna_P_28_10_2026.pdf" download>Resume <span class="icon-arrow icon-arrow-down" aria-hidden="true"></span></a>
   </header>
   <main id="main">
     <section class="hero section-shell" aria-labelledby="hero-title">
@@ -61,6 +61,12 @@
         </ul>
       </div>
       <div class="hero-copy">
+        <a class="hero-banner reveal reveal-up" href="#work" data-open-project="project-pico" style="--reveal-delay: 0.05s">
+          <span class="hero-banner-tag">New</span>
+          <img class="hero-banner-logo" src="assets/pico-logo-mark.svg" alt="" width="22" height="22" />
+          <span class="hero-banner-text"><strong>Pico v0.3.0</strong> — my 34M-parameter English grammar LLM, built from scratch and running on CPU</span>
+          <span class="hero-banner-arrow icon-arrow" aria-hidden="true"></span>
+        </a>
         <h1 id="hero-title" class="reveal reveal-up" style="--reveal-delay: 0.15s">I build <span class="gradient-text">useful software</span>, from the first idea to production.</h1>
         <p class="hero-lede reveal reveal-up" style="--reveal-delay: 0.3s">Full-stack engineer with 1.5 years in industry, shipping Shopify apps, a Chrome
           extension and agentic AI products. I work across RAG, LLM integrations, AWS deployment and workflow automation.</p>
@@ -143,7 +149,74 @@
 
       <div class="work-layout">
         <div class="work-stage reveal reveal-up" style="--reveal-delay: 0.12s">
-          <div class="work-panel is-active" role="tabpanel" id="panel-shopify" aria-labelledby="tab-shopify">
+          <div class="work-panel is-active" role="tabpanel" id="panel-llm" aria-labelledby="tab-llm">
+            <div class="project-grid">
+              <article class="project-item" id="project-pico" style="--i:0">
+                <button class="project-card" type="button" aria-haspopup="dialog">
+                  <span class="project-card-media">
+                    <img src="assets/pico-poster.png" alt="" />
+                    <span class="project-card-badge">New</span>
+                  </span>
+                  <span class="project-card-copy">
+                    <span class="project-card-kicker">Language model · PyTorch</span>
+                    <span class="project-card-title">Pico — English grammar LLM</span>
+                    <span class="project-card-hint">View details</span>
+                  </span>
+                </button>
+                <template class="project-modal-data">
+                  <img class="modal-fit-img modal-fit-dark" src="assets/pico-poster.png" alt="Pico poster: a tiny language model built from scratch in PyTorch that corrects English grammar on a laptop CPU" />
+                  <p class="modal-kicker">Language model · v0.3.0</p>
+                  <h3>Pico — Next Token Predictor</h3>
+                  <p>A 34.1M-parameter GPT-style language model built from scratch in PyTorch. Fine-tuned on grammar data, it corrects English sentences and answers grammar questions, running on a laptop CPU in about 0.27&nbsp;s per sentence.</p>
+                  <ul class="modal-points">
+                    <li>GPT decoder (8 layers × 8 heads, 512-dim, 1,024-token context) with a KV cache and a 16,384-token SentencePiece BPE tokenizer</li>
+                    <li>Pre-trained on 776M tokens (TinyStories + FineWeb-Edu) on free Kaggle 2× T4 GPUs</li>
+                    <li>Fine-tuned in stages on 485k grammar pairs, my English Practical Grammar dataset, 2.19M cLang8 learner sentences and real learner essays</li>
+                    <li>Fixes 25/30 benchmark sentences exactly, edit precision 0.93, F0.5 0.90; ERRANT F0.5 0.41 on CoNLL-2014 and 0.54 on JFLEG</li>
+                  </ul>
+                  <div class="modal-stats">
+                    <div><strong data-count="34.1" data-decimal="true">0</strong><span>M parameters</span></div>
+                    <div><strong data-count="776">0</strong><span>M training tokens</span></div>
+                    <div><strong data-count="25">0</strong><span>/ 30 sentences fixed</span></div>
+                  </div>
+                  <ul class="modal-tags"><li>Python</li><li>PyTorch</li><li>Transformers</li><li>SentencePiece</li><li>ERRANT</li><li>Kaggle</li></ul>
+                  <a class="button button-dark" href="https://github.com/Abhinav-Krishna-P/Pico-Next_Token_Predictor" target="_blank" rel="noopener noreferrer">View repository <span class="btn-arrow" aria-hidden="true"></span></a>
+                </template>
+              </article>
+              <article class="project-item" style="--i:1">
+                <button class="project-card" type="button" aria-haspopup="dialog">
+                  <span class="project-card-media project-card-media-code">
+                    <span class="project-card-code">4,233 records · 21 chapters</span>
+                    <span class="project-card-badge">New</span>
+                  </span>
+                  <span class="project-card-copy">
+                    <span class="project-card-kicker">Instruction dataset · SFT</span>
+                    <span class="project-card-title">English Practical Grammar dataset</span>
+                    <span class="project-card-hint">View details</span>
+                  </span>
+                </button>
+                <template class="project-modal-data">
+                  <div class="terminal-panel" aria-label="Dataset record preview"><span>SYSTEM</span>
+                    <p>You are an expert English grammar tutor.</p><span>USER</span>
+                    <p>What are articles? How many kinds of articles are there?</p><span>ASSISTANT</span>
+                    <p>The articles of English (the, a/an) are …</p><strong>FORMAT · OpenAI / HF chat messages, one JSONL per chapter</strong>
+                  </div>
+                  <p class="modal-kicker">Instruction dataset · SFT</p>
+                  <h3>English Practical Grammar dataset</h3>
+                  <p>A chat-format (system / user / assistant) instruction dataset for teaching English grammar to LLMs, covering 21 chapters of a practical grammar course: theory, worked examples, identification drills and every practice exercise with a correct answer and a short justification.</p>
+                  <ul class="modal-points">
+                    <li>4,233 records in 21 JSONL files, one per chapter (nouns, tenses, voice, concord, reported speech, punctuation …)</li>
+                    <li>Ready for supervised fine-tuning with TRL, Axolotl, Unsloth or LLaMA-Factory</li>
+                    <li>Used to fine-tune Pico to answer grammar questions</li>
+                  </ul>
+                  <ul class="modal-tags"><li>Dataset</li><li>JSONL</li><li>Instruction tuning</li><li>Hugging Face datasets</li></ul>
+                  <a class="button button-dark" href="https://github.com/Abhinav-Krishna-P/English-practical-grammer-Dataset" target="_blank" rel="noopener noreferrer">View repository <span class="btn-arrow" aria-hidden="true"></span></a>
+                </template>
+              </article>
+            </div>
+          </div>
+
+          <div class="work-panel" role="tabpanel" id="panel-shopify" aria-labelledby="tab-shopify" hidden>
             <div class="project-grid">
               <article class="project-item" style="--i:0">
                 <button class="project-card" type="button" aria-haspopup="dialog">
@@ -428,8 +501,13 @@
 
         <div class="work-nav reveal reveal-up" style="--reveal-delay: 0.08s" role="tablist" aria-label="Project categories" aria-orientation="vertical">
           <span class="work-nav-indicator" aria-hidden="true"></span>
-          <button class="work-nav-item is-active" type="button" role="tab" id="tab-shopify" aria-selected="true"
-            aria-controls="panel-shopify">
+          <button class="work-nav-item is-active" type="button" role="tab" id="tab-llm" aria-selected="true"
+            aria-controls="panel-llm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>
+            <span>Language models</span><em>2</em>
+          </button>
+          <button class="work-nav-item" type="button" role="tab" id="tab-shopify" aria-selected="false"
+            aria-controls="panel-shopify" tabindex="-1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7V5.5A3 3 0 0 1 12 2.5 3 3 0 0 1 15 5.5V7"/></svg>
             <span>Shopify apps</span><em>3</em>
           </button>
@@ -540,7 +618,7 @@
       <a href="https://www.linkedin.com/in/abhinavkrishnap" target="_blank" rel="noopener noreferrer">LinkedIn <span class="icon-arrow" aria-hidden="true"></span></a>
       <a href="https://github.com/Abhinav-Krishna-p" target="_blank" rel="noopener noreferrer">GitHub <span class="icon-arrow" aria-hidden="true"></span></a>
       <a href="https://leetcode.com/u/YWcKXilXgU/" target="_blank" rel="noopener noreferrer">LeetCode <span class="icon-arrow" aria-hidden="true"></span></a>
-      <a href="assets/Abhinav_Krishna_P_26_10_2026.pdf" download>Resume <span class="icon-arrow icon-arrow-down" aria-hidden="true"></span></a>
+      <a href="assets/Abhinav_Krishna_P_28_10_2026.pdf" download>Resume <span class="icon-arrow icon-arrow-down" aria-hidden="true"></span></a>
     </div>
     <p class="footer-note">© <span id="year">2026</span> Abhinav Krishna P · Designed and built for clarity.</p>
   </footer>

@@ -2987,3 +2987,70 @@ body.modal-open {
     grid-auto-columns: 9px;
   }
 }
+
+/* ── Hero announcement banner (new project) ── */
+.hero-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  margin: 0 0 26px;
+  padding: 6px 14px 6px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.35;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.hero-banner:hover {
+  border-color: var(--lime);
+  transform: translateY(-1px);
+}
+
+.hero-banner:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
+.hero-banner-tag {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--lime);
+  color: #111411;
+  font: 700 10px/1 var(--sans);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hero-banner-logo {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+
+.hero-banner-text {
+  min-width: 0;
+  color: var(--muted);
+}
+
+.hero-banner-text strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.hero-banner:hover .hero-banner-arrow {
+  transform: translateX(3px) rotate(45deg);
+}
+
+@media (max-width: 680px) {
+  .hero-banner {
+    border-radius: 18px;
+    align-items: flex-start;
+    font-size: 13px;
+  }
+}

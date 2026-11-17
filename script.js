@@ -434,6 +434,20 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.target.closest('[data-modal-close]')) closeProjectModal();
     });
 
+    // Hero banner: jump to the project's tab and open its details
+    document.querySelectorAll('[data-open-project]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const item = document.getElementById(link.dataset.openProject);
+        const panel = item && item.closest('[role="tabpanel"]');
+        const tab = panel && document.querySelector(`[role="tab"][aria-controls="${panel.id}"]`);
+        if (!item || !tab) return;
+        e.preventDefault();
+        tab.click();
+        document.getElementById('work')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => openProjectModal(item.querySelector('.project-card')), 450);
+      });
+    });
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && projectModal.classList.contains('is-open')) {
         closeProjectModal();
